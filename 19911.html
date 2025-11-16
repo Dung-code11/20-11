@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>20/11 - Dũng Lê Tiến</title>
+    <style>
+      body {
+        background: #000;
+        overflow: hidden;
+        margin: 0;
+        font-family: sans-serif;
+      }
+
+      /* ===== TEXT OVERLAY ===== */
+      .banner-text {
+        position: fixed;
+        top: 40px;
+        width: 100%;
+        text-align: center;
+        font-size: 42px;
+        font-weight: 700;
+        color: #ffcc33;
+        text-shadow: 0 0 10px #ff6699, 0 0 20px #ff3366;
+        animation: fadeIn 2s ease;
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      .wish-text {
+        position: fixed;
+        bottom: 60px;
+        width: 100%;
+        text-align: center;
+        font-size: 22px;
+        color: #fff;
+        font-weight: 400;
+        animation: fadeInUp 3s ease;
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(40px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ===== THREEJS TRÁI TIM ===== */
+      canvas.webgl {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        z-index: 2 !important;
+      }
+
+      /* ===== TRÁI TIM RƠI ===== */
+      #flowersCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 5;
+      }
+
+      /* ===== NÚT MỞ THƯ & NHẠC ===== */
+      .open-btn {
+        position: fixed;
+        right: 30px;
+        padding: 14px 22px;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        cursor: pointer;
+        z-index: 30;
+        box-shadow: 0 0 12px rgba(255, 105, 180, 0.7);
+        transition: 0.3s;
+        color: white;
+      }
+      .open-btn:hover {
+        transform: scale(1.07);
+        box-shadow: 0 0 18px rgba(255, 105, 180, 1);
+      }
+      #openLetterBtn {
+        bottom: 30px;
+        background: #ff6699;
+      }
+      #musicBtn {
+        bottom: 90px;
+        background: #33ccff;
+      }
+
+      /* ===== POPUP LÁ THƯ ===== */
+      .popup {
+        position: fixed;
+        inset: 0;
+        backdrop-filter: blur(6px);
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 50;
+      }
+      .popup-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 600px;
+        height: 380px;
+        background-image: url("letter.jpeg");
+        background-size: cover;
+        background-position: center;
+        padding: 40px 60px;
+        border-radius: 20px;
+        text-align: center;
+        animation: popupAppear 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        position: relative;
+      }
+      @keyframes popupAppear {
+        0% {
+          transform: scale(0.6) translateY(40px) rotate(-3deg);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1) translateY(0) rotate(0deg);
+          opacity: 1;
+        }
+      }
+      .close-x {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 28px;
+        color: #ff6699;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .letter-text h2 {
+        font-size: 26px;
+        margin-bottom: 15px;
+      }
+      .letter-text {
+        font-size: 20px;
+        color: #d14f6b;
+        line-height: 1.5;
+        font-weight: 500;
+        margin-top: -17px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="banner-text">Chúc Mừng Ngày Nhà Giáo Việt Nam 20/11 🎉</div>
+    <div class="wish-text">
+      Kính chúc thầy cô luôn vui vẻ, hạnh phúc và tràn đầy nhiệt huyết! 🌸
+    </div>
+
+    <button id="musicBtn" class="open-btn">🔊 Bật nhạc</button>
+    <button id="openLetterBtn" class="open-btn">💌 Gửi lời chúc</button>
+
+    <div id="letterPopup" class="popup">
+      <div class="popup-content">
+        <div id="closeX" class="close-x">✕</div>
+        <div class="letter-text">
+          <h2>💖 Thư Gửi Thầy Cô Và CBNV CodeGym 💖</h2>
+          <p>
+            Nhân ngày 20/11, xin gửi đến quý thầy cô và cán bộ nhân viên Trung
+            tâm CodeGym lời chúc tốt đẹp nhất. Chúc mọi người luôn tràn đầy niềm
+            vui, sức khỏe và nhiệt huyết trong hành trình mang tri thức đến cho
+            bao thế hệ học viên.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <canvas id="flowersCanvas"></canvas>
+    <audio id="bgMusic" loop>
+      <source src="music-bg (2).mp3" type="audio/mpeg" />
+    </audio>
+
+    <script>
+      // ==== POPUP & NHẠC ====
+      const openBtn = document.getElementById("openLetterBtn");
+      const popup = document.getElementById("letterPopup");
+      const closeX = document.getElementById("closeX");
+      const music = document.getElementById("bgMusic");
+      const musicBtn = document.getElementById("musicBtn");
+
+      openBtn.onclick = () => {
+        popup.style.display = "flex";
+        if (music.paused)
+          music
+            .play()
+            .then(() => (musicBtn.textContent = "🔇 Tắt nhạc"))
+            .catch(() => {});
+      };
+      closeX.onclick = () => (popup.style.display = "none");
+      popup.onclick = (e) => {
+        if (e.target === popup) popup.style.display = "none";
+      };
+
+      musicBtn.onclick = () => {
+        if (music.paused) {
+          music.play();
+          musicBtn.textContent = "🔇 Tắt nhạc";
+        } else {
+          music.pause();
+          musicBtn.textContent = "🔊 Bật nhạc";
+        }
+      };
+
+      // ==== TRÁI TIM RƠI ====
+      const canvas = document.getElementById("flowersCanvas");
+      const ctx = canvas.getContext("2d");
+      let W = (canvas.width = window.innerWidth);
+      let H = (canvas.height = window.innerHeight);
+
+      const hearts = [];
+      const heartCount = 40;
+
+      function randomColor() {
+        const colors = ["#ff6699", "#ffcc33", "#66ccff", "#ff9966", "#99ff66"];
+        return colors[Math.floor(Math.random() * colors.length)];
+      }
+
+      for (let i = 0; i < heartCount; i++) {
+        hearts.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          size: Math.random() * 12 + 8,
+          color: randomColor(),
+          speedY: Math.random() * 1 + 0.5,
+          speedX: Math.random() * 0.6 - 0.3,
+        });
+      }
+
+      function drawHeart(ctx, x, y, size, color) {
+        ctx.save();
+        ctx.beginPath();
+        const topCurveHeight = size * 0.3;
+        ctx.moveTo(x, y + topCurveHeight);
+        ctx.bezierCurveTo(
+          x,
+          y,
+          x - size / 2,
+          y,
+          x - size / 2,
+          y + topCurveHeight
+        );
+        ctx.bezierCurveTo(
+          x - size / 2,
+          y + (size + topCurveHeight) / 2,
+          x,
+          y + (size + topCurveHeight) / 1.5,
+          x,
+          y + size
+        );
+        ctx.bezierCurveTo(
+          x,
+          y + (size + topCurveHeight) / 1.5,
+          x + size / 2,
+          y + (size + topCurveHeight) / 2,
+          x + size / 2,
+          y + topCurveHeight
+        );
+        ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + topCurveHeight);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.8;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, W, H);
+        hearts.forEach((p) => {
+          drawHeart(ctx, p.x, p.y, p.size, p.color);
+          p.y += p.speedY;
+          p.x += p.speedX;
+          if (p.y > H + 20) {
+            p.y = -10;
+            p.x = Math.random() * W;
+          }
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      window.addEventListener("resize", () => {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      });
+    </script>
+
+    <!-- ===== THREEJS TRÁI TIM ===== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.131.3/examples/js/math/MeshSurfaceSampler.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.131.3/examples/js/controls/TrackballControls.js"></script>
+    <script src="https://assets.codepen.io/127738/simplex-noise.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.131.3/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+    <script>
+      // ==== THREEJS TRÁI TIM 3D ====
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.domElement.classList.add("webgl");
+      renderer.setClearColor(0xff5555);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      camera.position.z = 1;
+      const controls = new THREE.TrackballControls(camera, renderer.domElement);
+      controls.noPan = true;
+      controls.maxDistance = 3;
+      controls.minDistance = 0.7;
+
+      const group = new THREE.Group();
+      scene.add(group);
+
+      let heart = null,
+        sampler = null,
+        originHeart = null;
+      new THREE.OBJLoader().load(
+        "https://assets.codepen.io/127738/heart_2.obj",
+        (obj) => {
+          heart = obj.children[0];
+          heart.geometry.rotateX(-Math.PI * 0.5);
+          heart.geometry.scale(0.04, 0.04, 0.04);
+          heart.geometry.translate(0, -0.4, 0);
+          group.add(heart);
+          heart.material = new THREE.MeshBasicMaterial({ color: 0xff5555 });
+          originHeart = Array.from(heart.geometry.attributes.position.array);
+          sampler = new THREE.MeshSurfaceSampler(heart).build();
+          init();
+          renderer.setAnimationLoop(render);
+        }
+      );
+
+      let positions = [];
+      const geometry = new THREE.BufferGeometry();
+      const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+      const lines = new THREE.LineSegments(geometry, material);
+      group.add(lines);
+      const simplex = new SimplexNoise();
+      const pos = new THREE.Vector3();
+
+      class Grass {
+        constructor() {
+          sampler.sample(pos);
+          this.pos = pos.clone();
+          this.scale = Math.random() * 0.01 + 0.001;
+          this.one = null;
+          this.two = null;
+        }
+        update(a) {
+          const noise =
+            simplex.noise4D(
+              this.pos.x * 1.5,
+              this.pos.y * 1.5,
+              this.pos.z * 1.5,
+              a * 0.0005
+            ) + 1;
+          this.one = this.pos
+            .clone()
+            .multiplyScalar(1.01 + noise * 0.15 * beat.a);
+          this.two = this.one
+            .clone()
+            .add(this.one.clone().setLength(this.scale));
+        }
+      }
+
+      let spikes = [];
+      function init() {
+        for (let i = 0; i < 20000; i++) spikes.push(new Grass());
+      }
+
+      const beat = { a: 0 };
+      gsap
+        .timeline({ repeat: -1, repeatDelay: 0.3 })
+        .to(beat, { a: 1.2, duration: 0.6, ease: "power2.in" })
+        .to(beat, { a: 0, duration: 0.6, ease: "power3.out" });
+      gsap.to(group.rotation, {
+        y: Math.PI * 2,
+        duration: 12,
+        ease: "none",
+        repeat: -1,
+      });
+
+      function render(a) {
+        positions = [];
+        spikes.forEach((g) => {
+          g.update(a);
+          positions.push(g.one.x, g.one.y, g.one.z);
+          positions.push(g.two.x, g.two.y, g.two.z);
+        });
+        geometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(new Float32Array(positions), 3)
+        );
+
+        const vs = heart.geometry.attributes.position.array;
+        for (let i = 0; i < vs.length; i += 3) {
+          const v = new THREE.Vector3(
+            originHeart[i],
+            originHeart[i + 1],
+            originHeart[i + 2]
+          );
+          const noise =
+            simplex.noise4D(
+              originHeart[i] * 1.5,
+              originHeart[i + 1] * 1.5,
+              originHeart[i + 2] * 1.5,
+              a * 0.0005
+            ) + 1;
+          v.multiplyScalar(1 + noise * 0.15 * beat.a);
+          vs[i] = v.x;
+          vs[i + 1] = v.y;
+          vs[i + 2] = v.z;
+        }
+        heart.geometry.attributes.position.needsUpdate = true;
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>
