@@ -79,6 +79,8 @@
 
       /* ===== NÚT MỞ THƯ & NHẠC ===== */
       .open-btn {
+        width: 14rem;
+        height: 4rem;
         position: fixed;
         right: 30px;
         padding: 14px 22px;
@@ -96,14 +98,109 @@
         box-shadow: 0 0 18px rgba(255, 105, 180, 1);
       }
       #openLetterBtn {
-        bottom: 30px;
-        background: #ff6699;
+        position: fixed;
+        bottom: 80px; /* cao hơn wish-text */
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 14px 22px;
+        border-radius: 12px;
       }
       #musicBtn {
         bottom: 90px;
         background: #33ccff;
       }
+      ul {
+        position: fixed;
+        bottom: 80px;
+        left: 49%; /* căn giữa */
+        transform: translateX(-50%);
+        display: flex;
+        gap: 25px;
+        z-index: 20;
+      }
+      ul li {
+        position: relative;
+        list-style: none;
+        width: 60px;
+        height: 60px;
+        background: #fff;
+        border-radius: 60px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        transition: 0.5s;
+      }
 
+      ul li:hover {
+        width: 180px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0);
+      }
+
+      ul li::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 60px;
+        background: linear-gradient(45deg, var(--i), var(--j));
+        opacity: 0;
+        transition: 0.5s;
+      }
+
+      ul li:hover::before {
+        opacity: 1;
+      }
+
+      ul li::after {
+        content: "";
+        position: absolute;
+        top: 10px;
+        width: 100%;
+        height: 100%;
+        border-radius: 60px;
+        background: linear-gradient(45deg, var(--i), var(--j));
+        transition: 0.5s;
+        filter: blur(15px);
+        z-index: -1;
+        opacity: 0;
+      }
+
+      ul li:hover::after {
+        opacity: 0.5;
+      }
+
+      ul li .icon {
+        color: #777;
+        font-size: 1.75em;
+        transition: 0.5s;
+        transition-delay: 0.25s;
+      }
+
+      ul li:hover .icon {
+        transform: scale(0);
+        color: #fff;
+        transition-delay: 0s;
+      }
+
+      ul li span {
+        position: absolute;
+      }
+
+      ul li .title {
+        color: #fff;
+        font-size: 1em;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        transform: scale(0);
+        transition: 0.5s;
+        transition-delay: 0s;
+      }
+
+      ul li:hover .title {
+        transform: scale(1);
+        transition-delay: 0.25s;
+      }
       /* ===== POPUP LÁ THƯ ===== */
       .popup {
         position: fixed;
@@ -166,12 +263,17 @@
   </head>
   <body>
     <div class="banner-text">Chúc Mừng Ngày Nhà Giáo Việt Nam 20/11 🎉</div>
+    <ul id="openLetterBtn">
+      <li style="--i: #ff9966; --j: #ff5e62">
+        <span class="icon">❤️</span>
+        <span class="title">Gửi Lời Chúc</span>
+      </li>
+    </ul>
     <div class="wish-text">
       Kính chúc thầy cô luôn vui vẻ, hạnh phúc và tràn đầy nhiệt huyết! 🌸
     </div>
 
     <button id="musicBtn" class="open-btn">🔊 Bật nhạc</button>
-    <button id="openLetterBtn" class="open-btn">💌 Gửi lời chúc</button>
 
     <div id="letterPopup" class="popup">
       <div class="popup-content">
